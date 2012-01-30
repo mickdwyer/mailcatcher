@@ -13,6 +13,10 @@ class MailCatcher::Web < Sinatra::Base
   set :root, Pathname.new(__FILE__).dirname.parent.parent
   set :haml, :format => :html5
 
+  use Rack::Auth::Basic do |username, password|
+    username == 'mailuser' && password == 'Be5t$ecur3'
+  end
+
   get '/' do
     haml :index
   end
