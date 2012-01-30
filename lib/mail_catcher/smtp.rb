@@ -1,7 +1,7 @@
 require 'eventmachine'
 
 class MailCatcher::Smtp < EventMachine::Protocols::SmtpServer
-  # override the provided implementation so we can load certs/keys & start tls.
+  # override the provided EM implementation so we can load certs/keys & start tls.
   def process_starttls
     if @@parms[:starttls]
       if @state.include?(:starttls)
@@ -16,6 +16,11 @@ class MailCatcher::Smtp < EventMachine::Protocols::SmtpServer
     else
       process_unknown
     end
+  end
+
+  # Return true or false to indicate that the authentication is acceptable.
+  def receive_plain_auth user, password
+    user == 'mailuser' && password == 'Very$ecur3'
   end
 
   def current_message

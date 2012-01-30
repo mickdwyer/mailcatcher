@@ -14,7 +14,7 @@ class MailCatcher::Web < Sinatra::Base
   set :haml, :format => :html5
 
   use Rack::Auth::Basic do |username, password|
-    username == 'mailuser' && password == 'Be5t$ecur3'
+    username == 'mailuser' && password == 'Very$ecur3'
   end
 
   get '/' do
