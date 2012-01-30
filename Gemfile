@@ -1,5 +1,7 @@
 source 'http://rubygems.org'
 
+gem 'eventmachine', :git => 'git://github.com/mickdwyer/eventmachine.git'
+
 gemspec
 
 group :guard do
