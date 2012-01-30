@@ -1,6 +1,23 @@
 require 'eventmachine'
 
 class MailCatcher::Smtp < EventMachine::Protocols::SmtpServer
+  # override the provided implementation so we can load certs/keys & start tls.
+  def process_starttls
+    if @@parms[:starttls]
+      if @state.include?(:starttls)
+        send_data "503 TLS Already negotiated\r\n"
+      elsif ! @state.include?(:ehlo)
+        send_data "503 EHLO required before STARTTLS\r\n"
+      else
+        send_data "220 Start TLS negotiation\r\n"
+        start_tls @@parms.select { |k,v| [:private_key_file, :cert_chain_file, :verify_peer].include?(k) }
+        @state << :starttls
+      end
+    else
+      process_unknown
+    end
+  end
+
   def current_message
     @current_message ||= {}
   end
