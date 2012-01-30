@@ -49,6 +49,10 @@ module_function
     :verbose => false,
     :daemon => !windows?,
     :growl => growlnotify?,
+    :starttls => false,
+    :private_key_file => '/tmp/server.key',
+    :cert_chain_file => '/tmp/server.crt',
+    :verify_peer => false
   }
 
   def parse! arguments=ARGV, defaults=@@defaults
@@ -75,6 +79,22 @@ module_function
 
         parser.on("--http-port PORT", Integer, "Set the port address of the http server") do |port|
           options[:http_port] = port
+        end
+
+        parser.on("--starttls", "Turn on SMTP TLS") do 
+          options[:starttls] = true
+        end
+
+        parser.on("--ssl_verify", "Turn on SSL peer certificate verification for the SSL server") do 
+          options[:verify_peer] = true
+        end
+
+        parser.on("--ssl-cert FILE", "Set the SSL cert for the smtp server") do |file|
+          options[:cert_chain_file] = file
+        end
+
+        parser.on("--ssl-key FILE", "Set the SSL key for the smtp server") do |file|
+          options[:private_key_file] = file
         end
 
         if mac?
@@ -127,8 +147,10 @@ module_function
 
       # Set up an SMTP server to run within EventMachine
       rescue_port options[:smtp_port] do
+        # Setup TLS if we want it.
+        Smtp.parms = {:starttls => true, :private_key_file => options[:private_key_file], :cert_chain_file => options[:cert_chain_file], :verify_peer => options[:verify_peer]} if options[:starttls]
         EventMachine.start_server options[:smtp_ip], options[:smtp_port], Smtp
-        puts "==> smtp://#{options[:smtp_ip]}:#{options[:smtp_port]}"
+        puts "==> smtp://#{options[:smtp_ip]}:#{options[:smtp_port]} #{", with TLS (key : #{options[:private_key_file]}, cert: #{options[:cert_chain_file]}, verify: #{options[:verify_peer]})." if options[:starttls]}"
       end
 
       # Let Thin set itself up inside our EventMachine loop
