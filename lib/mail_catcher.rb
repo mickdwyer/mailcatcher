@@ -85,7 +85,7 @@ module_function
           options[:starttls] = true
         end
 
-        parser.on("--ssl_verify", "Turn on SSL peer certificate verification for the SSL server") do 
+        parser.on("--ssl-verify", "Turn on SSL peer certificate verification for the SSL server") do 
           options[:verify_peer] = true
         end
 
