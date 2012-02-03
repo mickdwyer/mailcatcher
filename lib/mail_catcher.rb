@@ -28,6 +28,7 @@ module_function
   end
 
   def growlnotify?
+    return false unless mac?
     system "which", "-s", "growlnotify"
   end
 
