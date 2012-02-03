@@ -20,7 +20,7 @@ class MailCatcher::Smtp < EventMachine::Protocols::SmtpServer
 
   # Return true or false to indicate that the authentication is acceptable.
   def receive_plain_auth user, password
-    user == 'mailuser' && password == 'Very$ecur3'
+    user == @@params[:username] && password == @@param[:password]
   end
 
   def current_message

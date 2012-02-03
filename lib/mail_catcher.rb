@@ -53,7 +53,9 @@ module_function
     :starttls => false,
     :private_key_file => '/tmp/server.key',
     :cert_chain_file => '/tmp/server.crt',
-    :verify_peer => false
+    :verify_peer => false,
+    :username => 'mailuser',
+    :password => 'Very$ecur3'
   }
 
   def parse! arguments=ARGV, defaults=@@defaults
@@ -80,6 +82,14 @@ module_function
 
         parser.on("--http-port PORT", Integer, "Set the port address of the http server") do |port|
           options[:http_port] = port
+        end
+
+        parser.on("--username USERNAME", "Set the port address of the http server") do |username|
+          options[:username] = username
+        end
+
+        parser.on("--password PASSWORD", "Set the port address of the http server") do |password|
+          options[:password] = password
         end
 
         parser.on("--starttls", "Turn on SMTP TLS") do 
@@ -148,6 +158,9 @@ module_function
 
       # Set up an SMTP server to run within EventMachine
       rescue_port options[:smtp_port] do
+        # Setup Auth credientials
+        Smtp.parms = { :username => options[:username] } 
+        Smtp.parms = { :password => options[:password] } 
         # Setup TLS if we want it.
         Smtp.parms = {:starttls => true, :private_key_file => options[:private_key_file], :cert_chain_file => options[:cert_chain_file], :verify_peer => options[:verify_peer]} if options[:starttls]
         EventMachine.start_server options[:smtp_ip], options[:smtp_port], Smtp
@@ -157,6 +170,7 @@ module_function
       # Let Thin set itself up inside our EventMachine loop
       # (Skinny/WebSockets just works on the inside)
       rescue_port options[:http_port] do
+        Web.parms = {:username => options[:username], :password => options[:password] } 
         Thin::Server.start options[:http_ip], options[:http_port], Web
         puts "==> http://#{options[:http_ip]}:#{options[:http_port]}"
       end

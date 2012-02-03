@@ -13,8 +13,14 @@ class MailCatcher::Web < Sinatra::Base
   set :root, Pathname.new(__FILE__).dirname.parent.parent
   set :haml, :format => :html5
 
+  @@parms = {}
+
+  def self.parms= parms=nil
+    @@parms = parms.dup if !parms.nil?
+  end
+
   use Rack::Auth::Basic do |username, password|
-    username == 'mailuser' && password == 'Very$ecur3'
+    username == @@parms[:username] && password == @@parms[:password]
   end
 
   get '/' do
